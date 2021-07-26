@@ -4,5 +4,8 @@ dev:
 	pip install --upgrade pip
 	pip install --requirement requirements.txt
 
+build:
+	 docker build -t scrape:v1 .
+
 run:
-	python scrape.py
+	docker run scrape:v1
