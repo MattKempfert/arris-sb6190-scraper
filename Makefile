@@ -10,7 +10,7 @@ install:
 test:
 	# Install testing dependencies
 	pip3 install --requirement requirements-test.txt
-	flake8
+	flake8 --statistics --count
 
 run-local: install test
 	# Execute script locally
