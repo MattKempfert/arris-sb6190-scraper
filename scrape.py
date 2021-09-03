@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from influxdb import InfluxDBClient
 
+
 def send_it():
     """
     Scrapes metrics from the Arris SURFboard SB6190 status page and sends it to InfluxDB

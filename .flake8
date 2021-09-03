@@ -1,0 +1,8 @@
+[flake8]
+    exclude = .git
+    max-line-length = 100
+    strict = true
+    lazy = false
+    complexity = 10
+    radon-max-cc = 10
+    max-complexity = 10
