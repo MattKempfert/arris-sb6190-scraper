@@ -3,14 +3,13 @@ import argparse
 import requests
 from bs4 import BeautifulSoup
 
-from scraper.pages.status import (process_downstream_channel, process_upstream_channel,
-                                  process_startup_procedure)
+from scraper.influxdb import send_metrics
 from scraper.setting import get_logger, BASE_URL
 
 logger = get_logger(name='scraper.main')
 
 
-def parse_page(page: str, url: str):
+def parse_page(url: str):
     logger.info(f"Parsing {url}")
     response = requests.get(url)
     if not response.ok:
@@ -19,13 +18,25 @@ def parse_page(page: str, url: str):
     return BeautifulSoup(response.content, "html.parser")
 
 
-def process_page(page: str, content: str):
-    logger.info(f"Processing {page}...")
-    match page:
-        case 'status':
-            process_startup_procedure(content)
-            process_downstream_channel(content)
-            process_upstream_channel(content)
+def process_page(content: str):
+    tables = content.find_all('table')
+    for table in tables[1:]:
+        rows = table.find_all('tr')
+        headers = rows[1].find_all('td')
+
+        tags = {
+            "page": content.title.string,
+            "table": table.th.string,
+            "key": headers[0].string
+        }
+        logger.info(f"Tags: {tags}")
+
+        for row in rows[2:]:
+            stats = {}
+            for i in range(len(headers)):
+                stats[headers[i].string] = row.find_all('td')[i].string
+            logger.info(f"Stats: {stats}")
+            send_metrics(tags, stats)
 
 
 if __name__ == "__main__":
@@ -35,10 +46,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # Set pages to scrape
     pages = args.pages
 
-    # Set base_url
     base_url = BASE_URL
     if args.base_url:
         base_url = args.base_url
@@ -54,7 +63,7 @@ if __name__ == "__main__":
                 logger.error(f"Page not found. Are you sure '{base_url}/{page}' is valid?")
 
         if url:
-            content = parse_page(page, url)
-            result = process_page(page, content)
+            content = parse_page(url)
+            result = process_page(content)
 
     logger.info("Done!")
