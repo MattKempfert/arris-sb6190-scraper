@@ -30,7 +30,7 @@ def process_page(content: str):
 
         tags = {
             "page": page_title,
-            "table": table.th.string, # same as rows[0].th.string
+            "table": table.th.string,  # same as rows[0].th.string
             "key": headers[0].string
         }
         logger.info(f"Tags: {tags}")
