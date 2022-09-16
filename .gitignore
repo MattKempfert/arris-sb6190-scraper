@@ -9,3 +9,6 @@ venv.bak/
 
 # VSCode
 .vscode
+
+# Python cache
+scraper/__pycache__/
