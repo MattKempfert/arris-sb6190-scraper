@@ -21,8 +21,10 @@ def format(value):
             value = value.removesuffix(suffix)
 
     try:
+        # Should have put more effort in to break out an int vs a float but meh, convert all values to floats
         value = float(value)
     except ValueError:
+        # A ValueError _should_ mean the value is an actual string and should not be converted to a float
         return value
     return value
 
