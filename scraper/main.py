@@ -3,8 +3,8 @@ import argparse
 import requests
 from bs4 import BeautifulSoup
 
-from scraper.influxdb import send_metrics
-from scraper.setting import get_logger, BASE_URL
+from influxdb import send_metrics
+from setting import get_logger, BASE_URL
 
 logger = get_logger(name='scraper.main')
 
@@ -19,18 +19,25 @@ def parse_page(url: str):
 
 
 def process_page(content: str):
+    logger.info(content)
+    page_title = content.title.string
     tables = content.find_all('table')
+
+    # Skip the first table (table[0]) since it's hidden
     for table in tables[1:]:
         rows = table.find_all('tr')
         headers = rows[1].find_all('td')
 
         tags = {
-            "page": content.title.string,
-            "table": table.th.string,
+            "page": page_title,
+            "table": table.th.string,  # same as rows[0].th.string
             "key": headers[0].string
         }
         logger.info(f"Tags: {tags}")
 
+        # Start at rows[2]
+        # - rows[0] is the table header
+        # - rows[1] are the column names
         for row in rows[2:]:
             stats = {}
             for i in range(len(headers)):
