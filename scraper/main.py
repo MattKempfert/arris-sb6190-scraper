@@ -19,7 +19,6 @@ def parse_page(url: str):
 
 
 def process_page(content: str):
-    logger.info(content)
     page_title = content.title.string
     tables = content.find_all('table')
 
