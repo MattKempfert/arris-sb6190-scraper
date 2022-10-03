@@ -22,25 +22,24 @@ def process_page(content: str):
     page_title = content.title.string
     tables = content.find_all('table')
 
-    # Skip the first table (table[0]) since it's hidden
-    for table in tables[1:]:
+    for table in tables[1:]:  # Skip the first table (table[0]) since it's hidden
         rows = table.find_all('tr')
         headers = rows[1].find_all('td')
+        key = headers[0].string
 
         tags = {
-            "page": page_title,
-            "table": table.th.string,  # same as rows[0].th.string
-            "key": headers[0].string
+            "Page": page_title,
+            "Table": table.th.string,  # same as rows[0].th.string
+            key: ""  # for example: `"Channel": "0"`
         }
-        logger.info(f"Tags: {tags}")
 
-        # Start at rows[2]
-        # - rows[0] is the table header
-        # - rows[1] are the column names
-        for row in rows[2:]:
+        for row in rows[2:]:  # Start at rows[2] - rows[0] is the table header and rows[1] are the column names
+            column = row.find_all('td')
+            tags[key] = column[0].string
             stats = {}
             for i in range(len(headers)):
-                stats[headers[i].string] = row.find_all('td')[i].string
+                stats[headers[i].string] = column[i].string
+            logger.info(f"Tags: {tags}")
             logger.info(f"Stats: {stats}")
             send_metrics(tags, stats)
 
